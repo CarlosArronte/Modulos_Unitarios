@@ -487,9 +487,7 @@ if __name__ == "__main__":
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--weight_decay", type=float, default=1e-5)
 
-    parser.add_argument("--train_ratio", type=float, default=0.70)
-    parser.add_argument("--val_ratio", type=float, default=0.15)
-
+   
     parser.add_argument("--patience", type=int, default=15)
     parser.add_argument("--min_delta", type=float, default=1e-6)
     parser.add_argument("--print_every", type=int, default=5)
