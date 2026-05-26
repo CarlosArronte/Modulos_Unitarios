@@ -445,10 +445,16 @@ def train(args):
         "batch_size": args.batch_size,
         "epochs": args.epochs,
         "best_epoch": best_epoch,
-        "best_val_loss": best_val_loss,
-        "train_ratio": args.train_ratio,
-        "val_ratio": args.val_ratio,
-        "episodes": episode_info
+        "best_val_loss": float(best_val_loss),
+        "train_folder": args.train_folder,
+        "val_folder": args.val_folder,
+        "test_folder": args.test_folder,
+        "train_episodes": train_info,
+        "val_episodes": val_info,
+        "test_episodes": test_info,
+        "num_train_samples": int(len(X_train)),
+        "num_val_samples": int(len(X_val)),
+        "num_test_samples": int(len(X_test))
     }
 
     with open(os.path.join(args.save_dir, "metadata.json"), "w", encoding="utf-8") as f:
