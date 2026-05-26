@@ -266,22 +266,25 @@ def train(args):
     device = torch.device("cuda" if torch.cuda.is_available() and not args.cpu else "cpu")
     print("Device:", device)
 
-    X, y, episode_info = load_dataset_from_folder(
-        data_folder=args.data_folder,
+    X_train, y_train, train_info = load_dataset_from_folder(
+    data_folder=args.train_folder,
+    history_len=args.history_len,
+    stride=args.stride,
+    max_files=None
+)
+
+    X_val, y_val, val_info = load_dataset_from_folder(
+        data_folder=args.val_folder,
         history_len=args.history_len,
         stride=args.stride,
-        max_files=args.max_files
+        max_files=None
     )
 
-    print("\nDataset construido:")
-    print("X:", X.shape)
-    print("y:", y.shape)
-
-    X_train, y_train, X_val, y_val, X_test, y_test = chronological_split(
-        X,
-        y,
-        train_ratio=args.train_ratio,
-        val_ratio=args.val_ratio
+    X_test, y_test, test_info = load_dataset_from_folder(
+        data_folder=args.test_folder,
+        history_len=args.history_len,
+        stride=args.stride,
+        max_files=None
     )
 
     x_scaler = StandardScaler()
@@ -461,7 +464,9 @@ def train(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--data_folder", type=str, required=True)
+    parser.add_argument("--train_folder", type=str, required=True)
+    parser.add_argument("--val_folder", type=str, required=True)
+    parser.add_argument("--test_folder", type=str, required=True)
     parser.add_argument("--save_dir", type=str, default="saved_mc_dropout_dyn")
 
     parser.add_argument("--history_len", type=int, default=20)
