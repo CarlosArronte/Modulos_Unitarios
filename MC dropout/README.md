@@ -701,7 +701,7 @@ La inferencia debe usar la carpeta de test real:
 
 ```powershell
 python infer_mc_dropout_test.py `
-  --test_folder "C:\Users\POLI\Desktop\Carlos\Tesis Doct\Modules\Modulos_Unitarios\MC dropout\DS\Test" `
+  --data_folder "C:\Users\POLI\Desktop\Carlos\Tesis Doct\Modules\Modulos_Unitarios\MC dropout\DS\Test" `
   --model_dir saved_mc_dropout_h20 `
   --output_dir mc_dropout_results_h20 `
   --n_mc 50
