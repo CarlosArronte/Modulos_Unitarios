@@ -259,22 +259,14 @@ def main(args):
     output_dim = metadata["output_dim"]
     hidden_dim = metadata["hidden_dim"]
     dropout_p = metadata["dropout_p"]
-    train_ratio = metadata["train_ratio"]
-    val_ratio = metadata["val_ratio"]
+    #train_ratio = metadata["train_ratio"]
+    #val_ratio = metadata["val_ratio"]
 
-    X, y, meta = load_dataset_from_folder(
+    X_test, y_test, meta_test = load_dataset_from_folder(
         args.data_folder,
         history_len=history_len,
         stride=stride,
         max_files=args.max_files
-    )
-
-    X_test, y_test, meta_test = chronological_test_split(
-        X,
-        y,
-        meta,
-        train_ratio=train_ratio,
-        val_ratio=val_ratio
     )
 
     x_scaler = joblib.load(os.path.join(args.model_dir, "x_scaler.pkl"))
