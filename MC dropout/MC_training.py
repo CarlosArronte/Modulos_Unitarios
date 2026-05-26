@@ -38,6 +38,17 @@ def set_seed(seed=42):
 def read_episode(file_path):
     df = pd.read_csv(file_path)
     df.columns = [str(c).strip() for c in df.columns]
+        # Recalcular Beta para evitar artefactos de ±180° cuando Vx ≈ 0 o Vx < 0 y Vy ≈ 0.
+    if "Vx" in df.columns and "Vy" in df.columns:
+        vx = df["Vx"].values.astype(float)
+        vy = df["Vy"].values.astype(float)
+
+        eps = 1e-6
+        beta_rad = np.arctan2(vy, np.maximum(np.abs(vx), eps))
+
+        # Mantener el mismo nombre de columna para no modificar el resto del pipeline.
+        df["Beta"] = np.rad2deg(beta_rad)
+
     return df
 
 
