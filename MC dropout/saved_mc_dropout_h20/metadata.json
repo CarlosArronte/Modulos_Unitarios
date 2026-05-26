@@ -1,0 +1,650 @@
+{
+    "state_cols": [
+        "Vy",
+        "AVz",
+        "Yaw",
+        "Beta",
+        "Ax",
+        "Ay",
+        "AVx",
+        "Roll"
+    ],
+    "control_cols": [
+        "Steer",
+        "Vx"
+    ],
+    "feature_cols": [
+        "Vy",
+        "AVz",
+        "Yaw",
+        "Beta",
+        "Ax",
+        "Ay",
+        "AVx",
+        "Roll",
+        "Steer",
+        "Vx"
+    ],
+    "history_len": 20,
+    "stride": 10,
+    "input_dim": 210,
+    "output_dim": 8,
+    "hidden_dim": 256,
+    "dropout_p": 0.1,
+    "batch_size": 512,
+    "epochs": 100,
+    "best_epoch": 15,
+    "best_val_loss": 0.04579467792530825,
+    "train_folder": "C:\\Users\\POLI\\Desktop\\Carlos\\Tesis Doct\\Modules\\Modulos_Unitarios\\MC dropout\\DS\\Train",
+    "val_folder": "C:\\Users\\POLI\\Desktop\\Carlos\\Tesis Doct\\Modules\\Modulos_Unitarios\\MC dropout\\DS\\Validation",
+    "test_folder": "C:\\Users\\POLI\\Desktop\\Carlos\\Tesis Doct\\Modules\\Modulos_Unitarios\\MC dropout\\DS\\Test",
+    "train_episodes": [
+        {
+            "file": "A_ATB_02.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "A_ATB_04.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "A_ATB_06.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "A_ATB_08.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "A_ATB_10.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "A_DLC_02.txt",
+            "rows": 12626,
+            "samples": 1261
+        },
+        {
+            "file": "A_DLC_04.txt",
+            "rows": 12625,
+            "samples": 1261
+        },
+        {
+            "file": "A_DLC_06.txt",
+            "rows": 12619,
+            "samples": 1260
+        },
+        {
+            "file": "A_DLC_08.txt",
+            "rows": 12628,
+            "samples": 1261
+        },
+        {
+            "file": "A_DLC_10.txt",
+            "rows": 12631,
+            "samples": 1261
+        },
+        {
+            "file": "A_FH_04.txt",
+            "rows": 105999,
+            "samples": 10598
+        },
+        {
+            "file": "A_FH_06.txt",
+            "rows": 83490,
+            "samples": 8347
+        },
+        {
+            "file": "A_FH_08.txt",
+            "rows": 75179,
+            "samples": 7516
+        },
+        {
+            "file": "A_FH_10.txt",
+            "rows": 201656,
+            "samples": 20164
+        },
+        {
+            "file": "A_SSI_02.txt",
+            "rows": 720001,
+            "samples": 71998
+        },
+        {
+            "file": "A_SSI_04.txt",
+            "rows": 720001,
+            "samples": 71998
+        },
+        {
+            "file": "A_SSI_06.txt",
+            "rows": 720001,
+            "samples": 71998
+        },
+        {
+            "file": "A_SSI_08.txt",
+            "rows": 720001,
+            "samples": 71998
+        },
+        {
+            "file": "A_SSI_10.txt",
+            "rows": 720001,
+            "samples": 71998
+        },
+        {
+            "file": "A_SWD_04.txt",
+            "rows": 61462,
+            "samples": 6145
+        },
+        {
+            "file": "A_SWD_06.txt",
+            "rows": 83462,
+            "samples": 8345
+        },
+        {
+            "file": "A_SWD_08.txt",
+            "rows": 111611,
+            "samples": 11159
+        },
+        {
+            "file": "A_SWD_10.txt",
+            "rows": 125061,
+            "samples": 12504
+        },
+        {
+            "file": "B_ATB_02.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "B_ATB_04.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "B_ATB_06.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "B_ATB_08.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "B_ATB_10.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "B_DLC_02.txt",
+            "rows": 12615,
+            "samples": 1260
+        },
+        {
+            "file": "B_DLC_04.txt",
+            "rows": 12598,
+            "samples": 1258
+        },
+        {
+            "file": "B_DLC_06.txt",
+            "rows": 12618,
+            "samples": 1260
+        },
+        {
+            "file": "B_DLC_08.txt",
+            "rows": 12624,
+            "samples": 1261
+        },
+        {
+            "file": "B_DLC_10.txt",
+            "rows": 12627,
+            "samples": 1261
+        },
+        {
+            "file": "B_FH_04.txt",
+            "rows": 90001,
+            "samples": 8998
+        },
+        {
+            "file": "B_FH_06.txt",
+            "rows": 83852,
+            "samples": 8384
+        },
+        {
+            "file": "B_FH_08.txt",
+            "rows": 76439,
+            "samples": 7642
+        },
+        {
+            "file": "B_FH_10.txt",
+            "rows": 71348,
+            "samples": 7133
+        },
+        {
+            "file": "B_SSI_02.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "B_SSI_04.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "B_SSI_06.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "B_SSI_08.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "B_SSI_10.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "B_SWD_04.txt",
+            "rows": 59562,
+            "samples": 5955
+        },
+        {
+            "file": "B_SWD_06.txt",
+            "rows": 85360,
+            "samples": 8534
+        },
+        {
+            "file": "B_SWD_08.txt",
+            "rows": 95662,
+            "samples": 9565
+        },
+        {
+            "file": "B_SWD_10.txt",
+            "rows": 126662,
+            "samples": 12665
+        },
+        {
+            "file": "DSUV_ATB_02.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "DSUV_ATB_04.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "DSUV_ATB_06.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "DSUV_ATB_08.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "DSUV_ATB_10.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "DSUV_DLC_02.txt",
+            "rows": 12653,
+            "samples": 1264
+        },
+        {
+            "file": "DSUV_DLC_04.txt",
+            "rows": 12615,
+            "samples": 1260
+        },
+        {
+            "file": "DSUV_DLC_06.txt",
+            "rows": 12621,
+            "samples": 1260
+        },
+        {
+            "file": "DSUV_DLC_08.txt",
+            "rows": 12625,
+            "samples": 1261
+        },
+        {
+            "file": "DSUV_DLC_10.txt",
+            "rows": 12627,
+            "samples": 1261
+        },
+        {
+            "file": "DSUV_FH_04.txt",
+            "rows": 84899,
+            "samples": 8488
+        },
+        {
+            "file": "DSUV_FH_06.txt",
+            "rows": 79046,
+            "samples": 7903
+        },
+        {
+            "file": "DSUV_FH_08.txt",
+            "rows": 76895,
+            "samples": 7688
+        },
+        {
+            "file": "DSUV_FH_10.txt",
+            "rows": 76201,
+            "samples": 7618
+        },
+        {
+            "file": "DSUV_SSI_02.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "DSUV_SSI_04.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "DSUV_SSI_06.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "DSUV_SSI_08.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "DSUV_SSI_10.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "DSUV_SWD_04.txt",
+            "rows": 52062,
+            "samples": 5205
+        },
+        {
+            "file": "DSUV_SWD_06.txt",
+            "rows": 65162,
+            "samples": 6515
+        },
+        {
+            "file": "DSUV_SWD_08.txt",
+            "rows": 96561,
+            "samples": 9654
+        },
+        {
+            "file": "DSUV_SWD_10.txt",
+            "rows": 112262,
+            "samples": 11225
+        },
+        {
+            "file": "ER_DLC_04.txt",
+            "rows": 14121,
+            "samples": 1410
+        },
+        {
+            "file": "ER_DLC_06.txt",
+            "rows": 14102,
+            "samples": 1409
+        },
+        {
+            "file": "ER_DLC_08.txt",
+            "rows": 14096,
+            "samples": 1408
+        },
+        {
+            "file": "ER_DLC_10.txt",
+            "rows": 14095,
+            "samples": 1408
+        },
+        {
+            "file": "ER_SSI_02.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "ER_SSI_04.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "ER_SSI_06.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "ER_SSI_08.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "ER_SSI_10.txt",
+            "rows": 60001,
+            "samples": 5998
+        }
+    ],
+    "val_episodes": [
+        {
+            "file": "LEV_ATB_02.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "LEV_ATB_04.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "LEV_ATB_06.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "LEV_ATB_08.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "LEV_ATB_10.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "LEV_DLC_04.txt",
+            "rows": 13088,
+            "samples": 1307
+        },
+        {
+            "file": "LEV_DLC_06.txt",
+            "rows": 13560,
+            "samples": 1354
+        },
+        {
+            "file": "LEV_DLC_08.txt",
+            "rows": 12815,
+            "samples": 1280
+        },
+        {
+            "file": "LEV_DLC_10.txt",
+            "rows": 12619,
+            "samples": 1260
+        },
+        {
+            "file": "LEV_FH_06.txt",
+            "rows": 90001,
+            "samples": 8998
+        },
+        {
+            "file": "LEV_FH_08.txt",
+            "rows": 90001,
+            "samples": 8998
+        },
+        {
+            "file": "LEV_FH_10.txt",
+            "rows": 90001,
+            "samples": 8998
+        },
+        {
+            "file": "LEV_SSI_02.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "LEV_SSI_04.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "LEV_SSI_06.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "LEV_SSI_08.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "LEV_SSI_10.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "LEV_SWD_06.txt",
+            "rows": 99762,
+            "samples": 9975
+        },
+        {
+            "file": "LEV_SWD_08.txt",
+            "rows": 93912,
+            "samples": 9390
+        },
+        {
+            "file": "LEV_SWD_10.txt",
+            "rows": 110561,
+            "samples": 11054
+        }
+    ],
+    "test_episodes": [
+        {
+            "file": "ORP_ATB_02.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "ORP_ATB_04.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "ORP_ATB_06.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "ORP_ATB_08.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "ORP_ATB_10.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "ORP_DLC_04.txt",
+            "rows": 12506,
+            "samples": 1249
+        },
+        {
+            "file": "ORP_DLC_06.txt",
+            "rows": 12616,
+            "samples": 1260
+        },
+        {
+            "file": "ORP_DLC_08.txt",
+            "rows": 12624,
+            "samples": 1261
+        },
+        {
+            "file": "ORP_DLC_10.txt",
+            "rows": 12625,
+            "samples": 1261
+        },
+        {
+            "file": "ORP_FH_04.txt",
+            "rows": 84353,
+            "samples": 8434
+        },
+        {
+            "file": "ORP_FH_06.txt",
+            "rows": 74407,
+            "samples": 7439
+        },
+        {
+            "file": "ORP_FH_08.txt",
+            "rows": 72887,
+            "samples": 7287
+        },
+        {
+            "file": "ORP_FH_10.txt",
+            "rows": 71378,
+            "samples": 7136
+        },
+        {
+            "file": "ORP_SSI_02.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "ORP_SSI_04.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "ORP_SSI_06.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "ORP_SSI_08.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "ORP_SSI_10.txt",
+            "rows": 60001,
+            "samples": 5998
+        },
+        {
+            "file": "ORP_SWD_04.txt",
+            "rows": 77561,
+            "samples": 7754
+        },
+        {
+            "file": "ORP_SWD_06.txt",
+            "rows": 86262,
+            "samples": 8625
+        },
+        {
+            "file": "ORP_SWD_08.txt",
+            "rows": 102412,
+            "samples": 10240
+        },
+        {
+            "file": "ORP_SWD_10.txt",
+            "rows": 119212,
+            "samples": 11920
+        }
+    ],
+    "num_train_samples": 782425,
+    "num_val_samples": 122594,
+    "num_test_samples": 133846
+}
