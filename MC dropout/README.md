@@ -25,17 +25,10 @@ donde:
 
 ```text
 x(t) = [Vy, AVz, Yaw, Beta, Ax, Ay, AVx, Roll]
-```
-
-y:
-
-```text
 u(t) = [Steer, Vx]
 ```
 
-El modelo recibe una ventana temporal histórica de estados y controles y predice el siguiente estado dinámico del vehículo.
-
-La diferencia respecto a una red neuronal determinística convencional es que, usando **Monte Carlo Dropout**, el modelo puede producir:
+El modelo recibe una ventana temporal histórica de estados y controles y predice el siguiente estado dinámico del vehículo. Con **Monte Carlo Dropout**, el modelo puede producir:
 
 ```text
 media de la predicción
@@ -85,39 +78,116 @@ Reducir la velocidad cuando el rollout futuro predice riesgo dinámico.
 
 El dataset está formado por múltiples archivos `.txt`, cada uno correspondiente a un episodio, maniobra, vehículo o condición específica.
 
-Ejemplo de estructura:
-
-```text
-DS/
-├── A_ATB_02.txt
-├── A_ATB_04.txt
-├── A_DLC_10.txt
-├── A_FH_10.txt
-├── A_SSI_02.txt
-├── A_SWD_10.txt
-├── B_ATB_02.txt
-├── B_DLC_10.txt
-├── DSUV_ATB_10.txt
-├── LEV_SSI_10.txt
-├── ORP_SWD_10.txt
-└── ...
-```
-
 Cada archivo debe contener como mínimo las columnas:
 
 ```text
 time,Vx,Vy,AVz,Yaw,Beta,Ax,Ay,AVx,Roll,Steer
 ```
 
-Ejemplo de encabezado:
+Los nombres de archivo siguen una estructura aproximada:
 
-```csv
-time,Vx,Vy,AVz,Yaw,Beta,Ax,Ay,AVx,Roll,Steer
+```text
+<vehiculo/configuracion>_<maniobra>_<nivel>.txt
+```
+
+Ejemplos:
+
+```text
+A_ATB_02.txt
+A_DLC_10.txt
+B_SWD_08.txt
+DSUV_SSI_10.txt
+LEV_FH_08.txt
+ORP_SWD_10.txt
+```
+
+donde:
+
+```text
+A, B, DSUV, ER, LEV, ORP  → vehículo/configuración
+ATB, DLC, FH, SSI, SWD    → tipo de maniobra
+02, 04, 06, 08, 10        → nivel/condición/intensidad
 ```
 
 ---
 
-## 4. Variables usadas
+## 4. Separación explícita en Train / Validation / Test
+
+La versión actual del pipeline usa **carpetas separadas** para entrenamiento, validación y test.
+
+La estructura esperada es:
+
+```text
+DS/
+├── Train/
+│   ├── A_ATB_02.txt
+│   ├── A_DLC_10.txt
+│   ├── B_SSI_08.txt
+│   ├── DSUV_SWD_10.txt
+│   └── ...
+├── Validation/
+│   ├── LEV_ATB_02.txt
+│   ├── LEV_DLC_10.txt
+│   ├── LEV_SSI_08.txt
+│   └── ...
+└── Test/
+    ├── ORP_ATB_02.txt
+    ├── ORP_DLC_10.txt
+    ├── ORP_SSI_08.txt
+    └── ...
+```
+
+La división recomendada para el paper es:
+
+```text
+Train:
+    A, B, DSUV, ER
+
+Validation:
+    LEV
+
+Test:
+    ORP
+```
+
+Esta separación evita que el modelo sea evaluado en ventanas temporales casi idénticas a las usadas durante entrenamiento.
+
+### Por qué no usar split aleatorio por muestras
+
+No se recomienda dividir aleatoriamente ventanas individuales en train/validation/test, porque las ventanas temporales son altamente correlacionadas.
+
+Ejemplo problemático:
+
+```text
+train: ventana de A_DLC_10.txt en t = 1.000 s
+test:  ventana de A_DLC_10.txt en t = 1.010 s
+```
+
+Eso produce leakage temporal y puede inflar artificialmente el desempeño.
+
+### Qué cambió respecto a la versión anterior
+
+La versión anterior usaba un único argumento:
+
+```text
+--data_folder
+```
+
+y después dividía internamente las muestras en train/validation/test.
+
+La versión actual usa tres argumentos separados:
+
+```text
+--train_folder
+--val_folder
+--test_folder
+```
+
+Por tanto, el script **no debe volver a dividir internamente** la carpeta `Train` en train/validation/test.
+
+---
+
+## 5. Variables usadas
 
 ### Estados dinámicos
 
@@ -142,7 +212,7 @@ CONTROL_COLS = [
 FEATURE_COLS = STATE_COLS + CONTROL_COLS
 ```
 
-Es decir, cada instante de la ventana histórica contiene 10 variables:
+Cada instante de la ventana histórica contiene 10 variables:
 
 ```text
 Vy, AVz, Yaw, Beta, Ax, Ay, AVx, Roll, Steer, Vx
@@ -168,7 +238,60 @@ Por tanto, la dimensión de entrada será:
 
 ---
 
-## 5. Por qué no se deben mezclar directamente los archivos
+## 6. Tratamiento de Beta
+
+Durante las pruebas iniciales se observó que la señal cruda de `Beta` puede presentar artefactos de envolvimiento angular, especialmente en maniobras tipo ATB, cuando:
+
+```text
+Vx ≈ 0 o Vx < 0 muy pequeño
+Vy ≈ 0
+```
+
+En esos casos, un cálculo tipo:
+
+```text
+Beta = atan2(Vy, Vx)
+```
+
+puede generar valores espurios cercanos a:
+
+```text
+±180°
+```
+
+aunque físicamente no exista deriva lateral significativa.
+
+Por ello, se recomienda recalcular `Beta` de forma robusta dentro de la función de lectura del episodio:
+
+```python
+def read_episode(file_path):
+    df = pd.read_csv(file_path)
+    df.columns = [str(c).strip() for c in df.columns]
+
+    if "Vx" in df.columns and "Vy" in df.columns:
+        vx = df["Vx"].values.astype(float)
+        vy = df["Vy"].values.astype(float)
+
+        eps = 1e-6
+        beta_rad = np.arctan2(vy, np.maximum(np.abs(vx), eps))
+        df["Beta"] = np.rad2deg(beta_rad)
+
+    return df
+```
+
+Esta corrección debe aplicarse de forma idéntica en:
+
+```text
+entrenamiento
+validación
+test
+inferencia
+rollout multi-step
+```
+
+---
+
+## 7. Por qué no se deben mezclar directamente los archivos
 
 Cada `.txt` representa un episodio o maniobra independiente. Por eso, el entrenamiento **no debe concatenar todos los archivos y luego construir ventanas**, porque eso podría crear una muestra artificial donde la historia viene del final de una maniobra y el target del inicio de otra.
 
@@ -184,16 +307,14 @@ Correcto:
 ```text
 1. Leer cada archivo por separado.
 2. Construir ventanas dentro de cada archivo.
-3. Concatenar las muestras resultantes.
+3. Concatenar las muestras resultantes dentro del split correspondiente.
 ```
 
-Esto evita transiciones dinámicamente falsas.
+Esto evita transiciones dinámicamente falsas entre maniobras.
 
 ---
 
-## 6. Monte Carlo Dropout
-
-### 6.1. Idea básica
+## 8. Monte Carlo Dropout
 
 Dropout normalmente se usa durante entrenamiento para regularizar la red. Durante inferencia, usualmente se desactiva.
 
@@ -221,10 +342,6 @@ media = predicción final
 desviación estándar = incertidumbre
 ```
 
----
-
-### 6.2. Interpretación
-
 Si el modelo predice:
 
 ```text
@@ -244,9 +361,7 @@ Esta incertidumbre se puede usar para construir márgenes conservadores:
 |Beta_mean| + k * Beta_std <= Beta_max
 ```
 
-donde `k` controla el nivel de conservadurismo.
-
-Ejemplos:
+donde `k` controla el nivel de conservadurismo:
 
 ```text
 k = 0      → predicción determinística
@@ -258,7 +373,7 @@ k = 3      → margen conservador
 
 ---
 
-## 7. Dependencias
+## 9. Dependencias
 
 Instalar dependencias principales:
 
@@ -270,29 +385,33 @@ Si se usa GPU, instalar PyTorch según la versión de CUDA desde la página ofic
 
 ---
 
-## 8. Script de entrenamiento
+## 10. Script de entrenamiento
 
 El entrenamiento se realiza con:
 
 ```text
-train_mc_dropout_dyn.py
+MC_training.py
 ```
 
 Este script:
 
-1. Lee todos los archivos `.txt` de una carpeta.
-2. Construye ventanas históricas dentro de cada episodio.
-3. Crea el target `x(t+1)`.
-4. Divide los datos en train, validation y test.
-5. Escala entradas y salidas con `StandardScaler`.
-6. Entrena una red neuronal multi-output con Dropout.
-7. Guarda el mejor modelo según `val_loss`.
-8. Guarda métricas determinísticas de test.
-9. Guarda scalers y metadata.
+1. Lee archivos `.txt` desde `--train_folder`.
+2. Lee archivos `.txt` desde `--val_folder`.
+3. Lee archivos `.txt` desde `--test_folder`.
+4. Construye ventanas históricas dentro de cada episodio.
+5. Crea el target `x(t+1)`.
+6. Escala entradas y salidas con `StandardScaler` ajustado **solo con Train**.
+7. Aplica el scaler de Train a Validation y Test.
+8. Entrena una red neuronal multi-output con Dropout.
+9. Usa `Validation` para early stopping.
+10. Evalúa el mejor modelo en `Test`.
+11. Guarda scalers, modelo, métricas y metadata.
+
+El script **no debe hacer split interno** usando `train_ratio` o `val_ratio` cuando se usan carpetas separadas.
 
 ---
 
-## 9. Arquitectura de la red
+## 11. Arquitectura de la red
 
 La red base usada es una MLP con Dropout:
 
@@ -327,19 +446,32 @@ epochs = 100
 
 ---
 
-## 10. Entrenamiento rápido de prueba
+## 12. Entrenamiento rápido de prueba
 
-Antes de entrenar con todo el dataset, se recomienda probar con pocos archivos:
+Para una prueba rápida, se recomienda crear carpetas reducidas:
+
+```text
+DS_debug/
+├── Train/
+├── Validation/
+└── Test/
+```
+
+con pocos archivos representativos en cada una.
+
+Ejemplo:
 
 ```powershell
-python train_mc_dropout_dyn.py `
-  --data_folder "C:\Users\POLI\Desktop\Carlos\Tesis Doct\Modules\Modulos_Unitarios\GP\DS" `
-  --save_dir saved_mc_dropout_test `
+python MC_training.py `
+  --train_folder "C:\Users\POLI\Desktop\Carlos\Tesis Doct\Modules\Modulos_Unitarios\MC dropout\DS_debug\Train" `
+  --val_folder "C:\Users\POLI\Desktop\Carlos\Tesis Doct\Modules\Modulos_Unitarios\MC dropout\DS_debug\Validation" `
+  --test_folder "C:\Users\POLI\Desktop\Carlos\Tesis Doct\Modules\Modulos_Unitarios\MC dropout\DS_debug\Test" `
+  --save_dir saved_mc_dropout_debug `
   --history_len 20 `
   --stride 20 `
-  --max_files 5 `
   --epochs 30 `
-  --batch_size 512
+  --batch_size 512 `
+  --dropout_p 0.10
 ```
 
 Esto sirve para verificar que:
@@ -347,19 +479,22 @@ Esto sirve para verificar que:
 ```text
 el dataset carga correctamente
 las columnas son reconocidas
+las tres carpetas se leen sin errores
 la red entrena sin errores
 los scalers y metadata se guardan
 ```
 
 ---
 
-## 11. Entrenamiento completo sugerido
+## 13. Entrenamiento completo sugerido
 
 Una vez validado el pipeline:
 
 ```powershell
-python train_mc_dropout_dyn.py `
-  --data_folder "C:\Users\POLI\Desktop\Carlos\Tesis Doct\Modules\Modulos_Unitarios\GP\DS" `
+python MC_training.py `
+  --train_folder "C:\Users\POLI\Desktop\Carlos\Tesis Doct\Modules\Modulos_Unitarios\MC dropout\DS\Train" `
+  --val_folder "C:\Users\POLI\Desktop\Carlos\Tesis Doct\Modules\Modulos_Unitarios\MC dropout\DS\Validation" `
+  --test_folder "C:\Users\POLI\Desktop\Carlos\Tesis Doct\Modules\Modulos_Unitarios\MC dropout\DS\Test" `
   --save_dir saved_mc_dropout_h20 `
   --history_len 20 `
   --stride 10 `
@@ -368,16 +503,38 @@ python train_mc_dropout_dyn.py `
   --dropout_p 0.10
 ```
 
----
-
-## 12. Argumentos principales del entrenamiento
-
-### `--data_folder`
-
-Carpeta con archivos `.txt`.
+También puede usarse una sola línea:
 
 ```powershell
---data_folder "C:\...\DS"
+python MC_training.py --train_folder "C:\Users\POLI\Desktop\Carlos\Tesis Doct\Modules\Modulos_Unitarios\MC dropout\DS\Train" --val_folder "C:\Users\POLI\Desktop\Carlos\Tesis Doct\Modules\Modulos_Unitarios\MC dropout\DS\Validation" --test_folder "C:\Users\POLI\Desktop\Carlos\Tesis Doct\Modules\Modulos_Unitarios\MC dropout\DS\Test" --save_dir saved_mc_dropout_h20 --history_len 20 --stride 10 --epochs 100 --batch_size 512 --dropout_p 0.10
+```
+
+---
+
+## 14. Argumentos principales del entrenamiento
+
+### `--train_folder`
+
+Carpeta con archivos `.txt` usados para ajustar los pesos de la red.
+
+```powershell
+--train_folder "C:\...\DS\Train"
+```
+
+### `--val_folder`
+
+Carpeta con archivos `.txt` usados para validación y early stopping.
+
+```powershell
+--val_folder "C:\...\DS\Validation"
+```
+
+### `--test_folder`
+
+Carpeta con archivos `.txt` usados para evaluación final.
+
+```powershell
+--test_folder "C:\...\DS\Test"
 ```
 
 ### `--save_dir`
@@ -394,12 +551,6 @@ Longitud de historia usada como entrada.
 
 ```powershell
 --history_len 20
-```
-
-Con `history_len = 20`, la entrada contiene:
-
-```text
-[x(t-20), u(t-20), ..., x(t), u(t)]
 ```
 
 ### `--stride`
@@ -428,15 +579,17 @@ Valores recomendados para probar:
 0.20
 ```
 
-### `--max_files`
+### `--max_train_files`, `--max_val_files`, `--max_test_files`
 
-Número máximo de archivos a usar.
+Opcionalmente, pueden usarse para limitar la cantidad de archivos por split durante pruebas rápidas:
 
 ```powershell
---max_files 5
+--max_train_files 10
+--max_val_files 5
+--max_test_files 5
 ```
 
-Útil para pruebas rápidas.
+Si tu script no implementa estos tres argumentos, se puede mantener temporalmente un único `--max_files`, pero lo más recomendable es que cada split tenga su propio límite.
 
 ### `--cpu`
 
@@ -448,7 +601,7 @@ Fuerza entrenamiento en CPU.
 
 ---
 
-## 13. Archivos generados por el entrenamiento
+## 15. Archivos generados por el entrenamiento
 
 El entrenamiento genera una carpeta como:
 
@@ -468,11 +621,11 @@ Pesos del modelo PyTorch.
 
 ### `x_scaler.pkl`
 
-Scaler usado para normalizar las entradas.
+Scaler usado para normalizar las entradas. Se ajusta únicamente con `Train`.
 
 ### `y_scaler.pkl`
 
-Scaler usado para normalizar las salidas.
+Scaler usado para normalizar las salidas. Se ajusta únicamente con `Train`.
 
 ### `metadata.json`
 
@@ -488,8 +641,22 @@ input_dim
 output_dim
 hidden_dim
 dropout_p
-train_ratio
-val_ratio
+train_folder
+val_folder
+test_folder
+num_train_samples
+num_val_samples
+num_test_samples
+```
+
+### `train_history.csv`
+
+Histórico de pérdidas:
+
+```text
+epoch
+train_loss
+val_loss
 ```
 
 ### `test_metrics_deterministic.csv`
@@ -508,7 +675,7 @@ error_max
 
 ---
 
-## 14. Inferencia con Monte Carlo Dropout
+## 16. Inferencia con Monte Carlo Dropout
 
 La inferencia se realiza con:
 
@@ -528,19 +695,37 @@ Este script:
 
 ---
 
-## 15. Ejecutar inferencia
+## 17. Ejecutar inferencia
+
+La inferencia debe usar la carpeta de test real:
 
 ```powershell
 python infer_mc_dropout_test.py `
-  --data_folder "C:\Users\POLI\Desktop\Carlos\Tesis Doct\Modules\Modulos_Unitarios\GP\DS" `
+  --test_folder "C:\Users\POLI\Desktop\Carlos\Tesis Doct\Modules\Modulos_Unitarios\MC dropout\DS\Test" `
   --model_dir saved_mc_dropout_h20 `
   --output_dir mc_dropout_results_h20 `
   --n_mc 50
 ```
 
+También puede usarse una sola línea:
+
+```powershell
+python infer_mc_dropout_test.py --test_folder "C:\Users\POLI\Desktop\Carlos\Tesis Doct\Modules\Modulos_Unitarios\MC dropout\DS\Test" --model_dir saved_mc_dropout_h20 --output_dir mc_dropout_results_h20 --n_mc 50
+```
+
+Si `metadata.json` contiene `test_folder`, el script puede usar ese valor automáticamente cuando `--test_folder` no sea informado.
+
 ---
 
-## 16. Argumentos principales de inferencia
+## 18. Argumentos principales de inferencia
+
+### `--test_folder`
+
+Carpeta con archivos `.txt` usados para inferencia/evaluación final.
+
+```powershell
+--test_folder "C:\...\DS\Test"
+```
 
 ### `--model_dir`
 
@@ -583,9 +768,17 @@ Carpeta donde se guardan los resultados de inferencia.
 --output_dir mc_dropout_results_h20
 ```
 
+### `--batch_size`
+
+Tamaño de batch usado durante inferencia.
+
+```powershell
+--batch_size 512
+```
+
 ---
 
-## 17. Archivos generados por la inferencia
+## 19. Archivos generados por la inferencia
 
 La inferencia genera:
 
@@ -597,7 +790,7 @@ mc_dropout_results_h20/
 
 ---
 
-## 18. `mc_dropout_metrics.csv`
+## 20. `mc_dropout_metrics.csv`
 
 Contiene métricas agregadas por variable:
 
@@ -623,7 +816,7 @@ Las métricas `std_*` describen la incertidumbre estimada por MC Dropout.
 
 ---
 
-## 19. `mc_dropout_predictions.csv`
+## 21. `mc_dropout_predictions.csv`
 
 Contiene predicciones muestra por muestra.
 
@@ -664,9 +857,7 @@ Donde:
 
 ---
 
-## 20. Cómo interpretar los resultados
-
-### Buen desempeño
+## 22. Cómo interpretar los resultados
 
 Un modelo útil debería tener:
 
@@ -676,9 +867,7 @@ RMSE bajo
 p95 error aceptable
 ```
 
-Pero para este proyecto no basta con el error promedio.
-
-También interesa:
+Pero para este proyecto no basta con el error promedio. También interesa:
 
 ```text
 si la incertidumbre aumenta cuando aumenta el error
@@ -686,39 +875,20 @@ si los errores altos se concentran en ciertas maniobras
 si Beta, AVz, Ay o Roll tienen colas de error
 ```
 
----
-
-### Posibles patrones
-
-#### Caso 1: bajo error y baja incertidumbre
+Posibles patrones:
 
 ```text
-Región confiable
+bajo error + baja incertidumbre  → región confiable
+bajo error + alta incertidumbre  → modelo conservador
+alto error + alta incertidumbre  → región difícil detectada
+alto error + baja incertidumbre  → caso peligroso: modelo sobreconfiado
 ```
 
-#### Caso 2: bajo error y alta incertidumbre
-
-```text
-Modelo conservador
-```
-
-#### Caso 3: alto error y alta incertidumbre
-
-```text
-Región difícil detectada
-```
-
-#### Caso 4: alto error y baja incertidumbre
-
-```text
-Caso peligroso: modelo sobreconfiado
-```
-
-Este último caso es especialmente importante para control cerca del límite dinámico.
+El último caso es especialmente importante para control cerca del límite dinámico.
 
 ---
 
-## 21. Margen dinámico con incertidumbre
+## 23. Margen dinámico con incertidumbre
 
 La salida del modelo puede usarse para calcular un margen dinámico.
 
@@ -761,7 +931,7 @@ Este margen es el núcleo del supervisor predictivo de velocidad.
 
 ---
 
-## 22. Uso del modelo en el supervisor de velocidad
+## 24. Uso del modelo en el supervisor de velocidad
 
 El controlador Pure Pursuit genera:
 
@@ -799,7 +969,7 @@ subject to M(lambda) >= 0
 
 ---
 
-## 23. Explicabilidad del supervisor
+## 25. Explicabilidad del supervisor
 
 Además de decidir `lambda`, se puede identificar:
 
@@ -836,7 +1006,7 @@ Esto conecta el método con XAI a nivel de decisión de control.
 
 ---
 
-## 24. Métricas útiles para el paper
+## 26. Métricas útiles para el paper
 
 Para evaluar el predictor:
 
@@ -869,7 +1039,7 @@ actual dynamic violations
 
 ---
 
-## 25. Experimentos sugeridos
+## 27. Experimentos sugeridos
 
 ### Experimento 1: PP nominal
 
@@ -908,7 +1078,7 @@ k = 3      → margen muy conservador
 
 ---
 
-## 26. Figuras sugeridas para el paper
+## 28. Figuras sugeridas para el paper
 
 1. Arquitectura del método:
 
@@ -952,7 +1122,7 @@ PP predictivo
 
 ---
 
-## 27. Cosas que conviene evitar en este paper
+## 29. Cosas que conviene evitar en este paper
 
 Evitar afirmar:
 
@@ -984,7 +1154,7 @@ Estos elementos pueden quedar como trabajo futuro.
 
 ---
 
-## 28. Limitaciones importantes
+## 30. Limitaciones importantes
 
 F1TENTH Gym es útil para validar lógica de control y racing, pero su dinámica puede ser limitada frente a simuladores más realistas.
 
@@ -1013,7 +1183,7 @@ modelos híbridos físico-aprendidos
 
 ---
 
-## 29. Recomendaciones iniciales
+## 31. Recomendaciones iniciales
 
 Entrenar primero con:
 
@@ -1054,24 +1224,27 @@ calibración de incertidumbre
 
 ---
 
-## 30. Resumen del pipeline
+## 32. Resumen del pipeline
 
 ```text
 1. Dataset multi-episodio en .txt
-2. Construcción de ventanas históricas dentro de cada episodio
-3. Entrenamiento de MLP con Dropout
-4. Inferencia Monte Carlo Dropout
-5. Estimación de media e incertidumbre
-6. Cálculo de márgenes dinámicos
-7. Rollout multi-step
-8. Speed scaling adaptativo
-9. Identificación de variable crítica y horizonte crítico
-10. Evaluación en F1TENTH Gym
+2. Separación explícita en Train / Validation / Test
+3. Construcción de ventanas históricas dentro de cada episodio
+4. Entrenamiento de MLP con Dropout
+5. Early stopping usando Validation
+6. Evaluación final en Test
+7. Inferencia Monte Carlo Dropout
+8. Estimación de media e incertidumbre
+9. Cálculo de márgenes dinámicos
+10. Rollout multi-step
+11. Speed scaling adaptativo
+12. Identificación de variable crítica y horizonte crítico
+13. Evaluación en F1TENTH Gym
 ```
 
 ---
 
-## 31. Idea central del paper
+## 33. Idea central del paper
 
 La idea central no es simplemente entrenar una red neuronal.
 
