@@ -1,1 +1,36 @@
 venv/
+GP/venv/
+GP/DS/
+PP\ rollover/venv/
+PP\ rollover/tracks/
+PP\ rollover/__pycache__/
+
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Model artifacts
+saved_*/
+*/saved_*/
+*.pt
+*.pkl
+*.joblib
+
+# Generated inference/training results
+mc_dropout_results*/
+*/mc_dropout_results*/
+*_metrics.csv
+*_predictions.csv
+test_metrics_deterministic.csv
+train_history.csv
+
+# Logs
+run_pp.csv
+.~lock.*#
+
+# Large datasets
+DS/
+*/DS/
