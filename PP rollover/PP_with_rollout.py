@@ -9,9 +9,9 @@ from math import ceil
 from controllers.base_controller import BaseController
 from controllers.pp_controller import PurePursuitController
 
-from loggers.telemetry_logger import TelemetryLogger
 
-logger = TelemetryLogger("run_pp.csv",0.33, dt=0.01)
+
+
 # ============================================================
 # CONTROLLER FACTORY (Open–Closed Principle)
 # ============================================================
@@ -118,17 +118,7 @@ def main():
         print(U_future.shape)
         print(U_future[:5])
 
-        # ==============================
-        # LOGGING (ignorar warmup)
-        # ==============================
-        if step_in_lap >= WARMUP_STEPS:
-            logger.step(
-                obs=obs,
-                steer_cmd=steer,
-                speed_cmd=speed,
-            )
-            total_steps += 1
-
+       
         step_in_lap += 1
         env.render(mode='human')
 
@@ -185,8 +175,7 @@ def main():
                 print("[INFO] Estimated max laps reached.")
                 break
 
-    logger.close()
-
+    
     print(
         "Total laps:", lap,
         "Total samples:", total_steps,
