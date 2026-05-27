@@ -1,14 +1,49 @@
 import os
+import sys
 import json
 import argparse
 import yaml
 import joblib
+
 import numpy as np
 import pandas as pd
+
 import torch
 import torch.nn as nn
 
-from argparse import Namespace
+
+# ============================================================
+# PROJECT PATHS
+# ============================================================
+
+# Este archivo está en:
+# Modules/Modulos_Unitarios/Supervisor/
+SUPERVISOR_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Carpeta raíz:
+# Modules/Modulos_Unitarios/
+PROJECT_ROOT = os.path.abspath(os.path.join(SUPERVISOR_DIR, ".."))
+
+# Carpeta del Pure Pursuit:
+# Modules/Modulos_Unitarios/PP rollover/
+PP_ROLLOVER_DIR = os.path.join(PROJECT_ROOT, "PP rollover")
+
+# Carpeta del MC Dropout:
+# Modules/Modulos_Unitarios/MC dropout/
+MC_DROPOUT_DIR = os.path.join(PROJECT_ROOT, "MC dropout")
+
+# Agregar PP rollover al path para poder importar controllers/
+if PP_ROLLOVER_DIR not in sys.path:
+    sys.path.insert(0, PP_ROLLOVER_DIR)
+
+# Opcional: agregar MC dropout al path si luego quieres reutilizar funciones de ahí
+if MC_DROPOUT_DIR not in sys.path:
+    sys.path.insert(0, MC_DROPOUT_DIR)
+
+
+# ============================================================
+# IMPORTS DEL PROYECTO
+# ============================================================
 
 from controllers.base_controller import BaseController
 from controllers.pp_controller import PurePursuitController
