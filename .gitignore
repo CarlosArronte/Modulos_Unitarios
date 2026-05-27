@@ -1,9 +1,9 @@
 venv/
 GP/venv/
 GP/DS/
-PP\ rollover/venv/
-PP\ rollover/tracks/
-PP\ rollover/__pycache__/
+Kinematic\ Actuator/venv/
+Kinematic\ Actuator/tracks/
+Kinematic\ Actuator/__pycache__/
 
 
 # Python
