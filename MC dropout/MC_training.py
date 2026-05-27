@@ -16,10 +16,18 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 
+# STATE_COLS = [
+#     "Vy", "AVz", "Yaw", "Beta",
+#     "Ax", "Ay", "AVx", "Roll"
+# ]
+
 STATE_COLS = [
-    "Vy", "AVz", "Yaw", "Beta",
-    "Ax", "Ay", "AVx", "Roll"
-]
+    "Vy",
+    "AVz",
+    "Beta",
+    "Ax",
+    "Ay"
+] #No roll dynamics in the gym and no good Yaw behavior
 
 CONTROL_COLS = [
     "Steer", "Vx"

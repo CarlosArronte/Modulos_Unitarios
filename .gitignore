@@ -1,25 +1,46 @@
-venv/
-GP/venv/
-GP/DS/
-Kinematic\ Actuator/venv/
-Kinematic\ Actuator/tracks/
-Kinematic\ Actuator/__pycache__/
-
-
-# Python
-__pycache__/
-*.pyc
+# Virtual environments
 venv/
 .venv/
+*/venv/
 
-# Model artifacts
+# Python cache
+__pycache__/
+*/__pycache__/
+*.pyc
+
+# Datasets
+DS/
+*/DS/
+
+# GP artifacts
+GP/saved_gp_h10/
+GP/saved_gp_pure/
+GP/DS/
+GP/venv/
+
+# MC Dropout artifacts
+MC dropout/saved_mc_dropout_h20/
+MC dropout/mc_dropout_results_h20/
+MC dropout/DS/
+MC dropout/venv/
+
+# Kinematic Actuator generated files
+Kinematic Actuator/venv/
+Kinematic Actuator/tracks/
+Kinematic Actuator/presentation_results/
+Kinematic Actuator/presentation_results_3000/
+Kinematic Actuator/supervisor_rollout_results/
+Kinematic Actuator/__pycache__/
+
+# Generic model artifacts
 saved_*/
 */saved_*/
 *.pt
 *.pkl
 *.joblib
+*.npz
 
-# Generated inference/training results
+# Generated results
 mc_dropout_results*/
 */mc_dropout_results*/
 *_metrics.csv
@@ -27,10 +48,6 @@ mc_dropout_results*/
 test_metrics_deterministic.csv
 train_history.csv
 
-# Logs
+# Logs / lock files
 run_pp.csv
 .~lock.*#
-
-# Large datasets
-DS/
-*/DS/
