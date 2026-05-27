@@ -2,12 +2,9 @@
     "state_cols": [
         "Vy",
         "AVz",
-        "Yaw",
         "Beta",
         "Ax",
-        "Ay",
-        "AVx",
-        "Roll"
+        "Ay"
     ],
     "control_cols": [
         "Steer",
@@ -16,25 +13,22 @@
     "feature_cols": [
         "Vy",
         "AVz",
-        "Yaw",
         "Beta",
         "Ax",
         "Ay",
-        "AVx",
-        "Roll",
         "Steer",
         "Vx"
     ],
     "history_len": 20,
     "stride": 10,
-    "input_dim": 210,
-    "output_dim": 8,
+    "input_dim": 147,
+    "output_dim": 5,
     "hidden_dim": 256,
     "dropout_p": 0.1,
     "batch_size": 512,
     "epochs": 100,
-    "best_epoch": 15,
-    "best_val_loss": 0.04579467792530825,
+    "best_epoch": 16,
+    "best_val_loss": 0.05153747051135724,
     "train_folder": "C:\\Users\\POLI\\Desktop\\Carlos\\Tesis Doct\\Modules\\Modulos_Unitarios\\MC dropout\\DS\\Train",
     "val_folder": "C:\\Users\\POLI\\Desktop\\Carlos\\Tesis Doct\\Modules\\Modulos_Unitarios\\MC dropout\\DS\\Validation",
     "test_folder": "C:\\Users\\POLI\\Desktop\\Carlos\\Tesis Doct\\Modules\\Modulos_Unitarios\\MC dropout\\DS\\Test",

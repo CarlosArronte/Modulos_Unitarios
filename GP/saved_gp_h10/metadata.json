@@ -2,12 +2,9 @@
     "state_cols": [
         "Vy",
         "AVz",
-        "Yaw",
         "Beta",
         "Ax",
-        "Ay",
-        "AVx",
-        "Roll"
+        "Ay"
     ],
     "control_cols": [
         "Steer",
@@ -16,18 +13,15 @@
     "feature_cols": [
         "Vy",
         "AVz",
-        "Yaw",
         "Beta",
         "Ax",
         "Ay",
-        "AVx",
-        "Roll",
         "Steer",
         "Vx"
     ],
     "history_len": 10,
     "stride": 10,
-    "input_dim": 110,
+    "input_dim": 77,
     "train_ratio": 0.7,
     "val_ratio": 0.15,
     "max_train_samples": 3000,
