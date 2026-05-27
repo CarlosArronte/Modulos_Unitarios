@@ -1,0 +1,59 @@
+# metadata
+run_name: 'map_wide'
+# characteristic number for map
+perf_num: 6
+
+# map paths
+#map_path: './example_map'
+map_path: './tracks/training/Austin/Austin_map'
+
+map_ext: '.png'
+
+# starting pose for map
+sx: 0.0
+sy: 0.0
+stheta: 5.6364428
+
+
+# raceline path and indices
+#wpt_path: './example_waypoints.csv'
+wpt_path: './tracks/training/Austin/Austin_centerline.csv'
+wpt_path_type: 1   # 1 = centerline/ 2 = raceline
+
+wpt_delim: ',' #; = raceline / , = centerline
+wpt_rowskip: 1 #3 = raceline / 1 = centerline
+wpt_xind: 0 #1 = raceline / 0 = centerline
+wpt_yind: 1 #2 = raceline / 1 = centerline
+wpt_thind: 3
+wpt_vind: 5
+
+# varied params bound
+# physical params
+mass_min: 3.0
+mass_max: 4.0
+lf_min: 0.147
+lf_max: 0.170
+# controller params
+tlad_min: 0.6
+tlad_max: 1.8
+
+
+vgain_min: 0.85
+vgain_max: 1.05
+
+
+# computation budget (can think of it as gen_num times pop_size)
+popsize: 100
+budget: 1000
+
+# optimization method
+optim_method: 'CMA'
+
+# seed
+seed: 12345
+
+#adjust this for the pp controller
+v_max: 6.0
+v_min: 2.2
+kappa_gain: 2.5
+
